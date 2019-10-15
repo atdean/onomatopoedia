@@ -1,0 +1,9 @@
+Onomatopoeidia is a place where people can upload definitions of words that
+represent sounds, along with sound clips demonstrating the sound. It's
+modeled loosely after Urban Dictionary.
+
+Users don't need to log in to view already-uploaded sounds, but must create
+an account in order to upload their own.
+
+The application will be served as a static frontend app with a decoupled
+back-end REST API written in either Node or Golang (still deciding.)
