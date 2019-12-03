@@ -6,4 +6,50 @@ Users don't need to log in to view already-uploaded sounds, but must create
 an account in order to upload their own.
 
 The application will be served as a static frontend app with a decoupled
-back-end REST API written in either Node or Golang (still deciding.)
+back-end REST API written in Golang.
+
+ROUTES
+
+GET /                   ----
+                        Display the index page, with a list of the most recent
+                        sounds, paginated, starting from most recent to oldest.
+                        If logged in, show the user's account dropdown
+                        menu, and a logout button. "Upload a sound" button should
+                        always be present, and if the user isn't logged in, it
+                        will take them to the sign up/in page.
+                        Takes ?page=# query param to denote what page it's on.
+
+GET /about              ----
+                        A basic about page for the site with contact info.
+
+GET /login              ----
+                        Shows the login page. Also has a link to sign up. If the user
+                        tried to log in and it failed, it will show a flash message
+                        indicating that login failed and to try again. Also inclues a
+                        link to reset password.
+
+POST /login             ----
+                        Attempts to log the user in using the credentials provided. If
+                        login failed, it will return to the login page with an error as
+                        described above. Otherwise, it'll return to the index.
+
+GET /logout             ----
+                        Always logs the user out, if a user is logged in. Returns to index.
+
+GET /users/:username    ----
+                        If the username param is a the logged-in user, it will take
+                        them to their profile/account page. If the username is a
+                        different user, or the user is not logged in, it will show
+                        the user's profile and a list of the sounds they've uploaded.
+
+GET /users/:username/edit
+                        If logged in, takes the user to the edit profile page. If not
+                        logged in, returns to the user's public profile page.
+
+POST /users/:username/edit
+                        If logged in, applies any changes the user made to their profile.
+                        If there is an error, it will return to the route above with a
+                        flash error message, indicating what went wrong.
+
+GET /sounds/:slug       ----
+                        Displays the page for the specific sound specified by the URL param.
