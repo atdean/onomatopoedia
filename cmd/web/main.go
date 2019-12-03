@@ -5,14 +5,27 @@ import (
 	"log"
 	"net/http"
 
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/atdean/onomatopoedia/pkg/webserver"
 )
 
 func main() {
+	dbConn, err := sql.Open("mysql", "onomatopoedia:onomatopoedia@/onomatopoedia")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = dbConn.Ping()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	app := webserver.App{
-		IndexController: webserver.IndexController{},
+		SqlPool: dbConn,
+		IndexController: webserver.IndexController{dbConn},
 	}
 
 	fmt.Println("HTTP server started... listening on port 8080")

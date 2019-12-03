@@ -5,3 +5,5 @@ vendor/*
 !vendor/.gitkeep
 !vendor/modules.txt
 .idea/
+bin/
+!bin/.gitkeep
