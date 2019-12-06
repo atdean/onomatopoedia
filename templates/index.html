@@ -1,3 +1,10 @@
 {{ define "content" }}
     <h3>This is the content of the index page.</h3>
+    <div class="entries-container">
+        {{ range $entry := .Entries }}
+            <div class="entry">
+                <p>{{ $entry.DisplayName }}</p>
+            </div>
+        {{ end }}
+    </div>
 {{ end }}

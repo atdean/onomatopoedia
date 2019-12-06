@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"database/sql"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -12,28 +11,32 @@ import (
 	"github.com/atdean/onomatopoedia/pkg/repositories"
 )
 
-// IndexController contains route handlers for the index page
 type IndexController struct {
 	SqlPool *sql.DB
 }
 
-// GetIndexHandler servers a GET request for route /
+func NewIndexController(db *sql.DB) *IndexController {
+	return &IndexController{
+		SqlPool: db,
+	}
+}
+
 func (ctrl *IndexController) GetIndexHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	entriesRepo := repositories.EntryRepository{SqlPool: ctrl.SqlPool}
-	entry, err := entriesRepo.GetByID(1)
+	entries, err := entriesRepo.GetMostRecent(10, 1)
 	if err != nil {
 		log.Println(err)
-	} else {
-		fmt.Printf("Entry ID: %d, UserID: %d, Slug: %s, DisplayName: %s\n",
-			entry.ID, entry.UserID, entry.Slug, entry.DisplayName)
+	}
+
+	data := map[string]interface{}{
+		"Entries": entries,
 	}
 
 	renderer := template.Must(template.ParseFiles(
 		"templates/base.html",
 		"templates/index.html",
 	))
-	err = renderer.ExecuteTemplate(w, "base", nil)
-	if err != nil {
+	if err = renderer.ExecuteTemplate(w, "base", data); err != nil {
 		log.Println(err)
 	}
 }

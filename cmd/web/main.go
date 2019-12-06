@@ -25,7 +25,7 @@ func main() {
 
 	app := webserver.App{
 		SqlPool: dbConn,
-		IndexController: webserver.IndexController{dbConn},
+		IndexController: webserver.NewIndexController(dbConn),
 	}
 
 	fmt.Println("HTTP server started... listening on port 8080")
