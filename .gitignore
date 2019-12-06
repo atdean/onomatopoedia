@@ -7,3 +7,5 @@ vendor/*
 .idea/
 bin/
 !bin/.gitkeep
+node_modules/*
+public/css/*.css

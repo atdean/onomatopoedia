@@ -1,0 +1,24 @@
+{
+  "name": "onomatopoedia",
+  "version": "0.1.0",
+  "description": "Your friendly neighborhood resource for discovering linguistic articulations of sonic utterances.",
+  "main": "cmd/web/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atdean/onomatopoedia.git"
+  },
+  "author": "Austin Dean <austin@atdean.com>",
+  "bugs": {
+    "url": "https://github.com/atdean/onomatopoedia/issues"
+  },
+  "homepage": "https://github.com/atdean/onomatopoedia#readme",
+  "private": true,
+  "devDependencies": {
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "gulp-sass": "^4.0.2"
+  }
+}

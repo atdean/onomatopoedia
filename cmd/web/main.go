@@ -37,5 +37,7 @@ func initRoutes(app *webserver.App) http.Handler {
 
 	router.GET("/", app.IndexController.GetIndexHandler)
 
+	router.ServeFiles("/static/*filepath", http.Dir("./public"))
+
 	return router
 }
