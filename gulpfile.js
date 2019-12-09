@@ -1,11 +1,11 @@
-const { src, dest, series } = require('gulp');
+const gulp = require('gulp');
 const sass = require('gulp-sass');
 const del = require('del');
 
 function styles(cb) {
-    return src('public/scss/**/*.scss')
+    return gulp.src('public/scss/**/*.scss')
         .pipe(sass().on('error', sass.logError))
-        .pipe(dest('public/css/'));
+        .pipe(gulp.dest('public/css/'));
 }
 
 function clean(cb) {
@@ -14,5 +14,10 @@ function clean(cb) {
     ]);
 }
 
-exports.build = series(clean, styles);
+function watch(cb) {
+    gulp.watch('public/scss/**/*.scss', gulp.series(clean, styles));
+}
+
+exports.build = gulp.series(clean, styles);
 exports.clean = clean;
+exports.watch = watch;
