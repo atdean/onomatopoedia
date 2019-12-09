@@ -29,6 +29,7 @@ func (ctrl *IndexController) GetIndexHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	data := map[string]interface{}{
+		"PageTitle": "Home",
 		"Entries": entries,
 	}
 

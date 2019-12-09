@@ -5,11 +5,29 @@
         <meta charset="utf-8"/>
         <title>The Onomatopoedia - {{ .PageTitle }}</title>
 
-        <link rel="stylesheet" href="/static/css/main.css">
+        <link href="https://unpkg.com/sanitize.css" rel="stylesheet" />
+        <link href="/static/css/main.css" rel="stylesheet" />
     </head>
     <body>
-        <h1>The Onomatopoedia</h1>
-        {{ template "content" . }}
+        <div class="page-container">
+            <header class="header-primary">
+                <div class="header-left">
+                    <h1 class="header-logo">The Onomatopoedia</h1>
+                </div>
+                <div class="header-right">
+                    <nav class="header-nav">
+                        <a class="header-nav-link header-nav-link-post" href="#">Post a Word!</a>
+                        <a class="header-nav-link" href="#">Browse</a>
+                        <a class="header-nav-link" href="#">Categories</a>
+                        <a class="header-nav-link" href="#">About</a>
+                    </nav>
+                </div>
+            </header>
+
+            <div class="content-container">
+                {{ template "content" . }}
+            </div>
+        </div>
     </body>
 </html>
 {{ end }}

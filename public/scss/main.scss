@@ -1,3 +1,46 @@
-body {
-  color: #00f;
+.page-container {
+  width: 1024px;
+  margin: 0 auto;
+  border: 1px dashed #888888;
+}
+
+.header-primary {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  margin-top: 25px;
+
+  border: 1px solid #ff0000;
+}
+
+.header-logo {
+  margin: 0;
+}
+
+.header-primary > div {
+  border: 1px solid #0000ff;
+}
+
+.header-left { }
+.header-right { }
+
+.header-nav-link {
+  padding: 15px;
+}
+
+.content-container {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.index-hero-text {
+  text-align: center;
+}
+
+.entries-container .entry {
+  border: 2px solid #000;
+  background-color: #ccc;
+  margin-bottom: 20px;
+  padding-left: 20px;
 }

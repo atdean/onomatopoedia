@@ -1,10 +1,14 @@
 {{ define "content" }}
-    <h3>This is the content of the index page.</h3>
+    <h3 class="index-hero-text">Welcome to the Onomatopoedia!<br/>Your friendly neighborhood resource for discovering linguistic articulations of sonic utterances.</h3>
     <div class="entries-container">
-        {{ range $entry := .Entries }}
-            <div class="entry">
-                <p>{{ $entry.DisplayName }}</p>
-            </div>
+        {{ if eq (len .Entries) 0 }}
+            <p>No results were found.</p>
+        {{ else }}
+            {{ range $entry := .Entries }}
+                <div class="entry">
+                    <p>{{ $entry.DisplayName }}</p>
+                </div>
+            {{ end }}
         {{ end }}
     </div>
 {{ end }}
