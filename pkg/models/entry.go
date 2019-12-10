@@ -1,9 +1,8 @@
 package models
 
-// Entry represents a correlation to a single "word" in the "entries" table
 type Entry struct {
-	ID     			int    `db:"id"`
-	UserID 			int    `db:"user_id"`
+	ID     			int    `db:"entry_id"`
+	User
 	Slug   			string `db:"slug"`
 	DisplayName   	string `db:"display_name"`
 }

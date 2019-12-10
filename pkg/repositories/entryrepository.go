@@ -33,9 +33,11 @@ func (repo *EntryRepository) GetMostRecent(resultsPerPage int, page int) ([]*mod
 
 	queryString := `
 		SELECT
-			entries.id, entries.user_id, entries.slug, entries.display_name
+			entries.id AS entry_id, entries.user_id, entries.slug, entries.display_name,
+			users.username
 		FROM entries
-		ORDER BY id DESC
+		INNER JOIN users ON entries.user_id = users.id
+		ORDER BY entries.id DESC
 		LIMIT ?,?
 	`
 	rows, err := repo.SqlPool.Queryx(queryString, (page - 1) * resultsPerPage, resultsPerPage)

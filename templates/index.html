@@ -6,7 +6,7 @@
         {{ else }}
             {{ range $entry := .Entries }}
                 <div class="entry">
-                    <p>{{ $entry.DisplayName }}</p>
+                    <p>{{ $entry.DisplayName }}<br />Posted by <a href="#">{{ $entry.User.Username }}</a></p>
                 </div>
             {{ end }}
         {{ end }}
