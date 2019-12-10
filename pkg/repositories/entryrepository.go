@@ -1,26 +1,27 @@
 package repositories
 
 import (
-	"database/sql"
 	"github.com/atdean/onomatopoedia/pkg/models"
+	"github.com/jmoiron/sqlx"
 	"log"
 )
 
 type EntryRepository struct {
-	SqlPool *sql.DB
+	SqlPool *sqlx.DB
 }
 
 func (repo *EntryRepository) GetByID(entryID int) (*models.Entry, error) {
 	entry := &models.Entry{}
 
-	row := repo.SqlPool.QueryRow(`
+	queryString := `
 		SELECT
 			entries.id, entries.user_id, entries.slug, entries.display_name
 		FROM entries
 		WHERE entries.id = ?
-	`, entryID)
+	`
+	row := repo.SqlPool.QueryRowx(queryString, entryID)
 
-	if err := row.Scan(&entry.ID, &entry.UserID, &entry.Slug, &entry.DisplayName); err != nil {
+	if err := row.StructScan(entry); err != nil {
 		return nil, err
 	}
 
@@ -30,14 +31,19 @@ func (repo *EntryRepository) GetByID(entryID int) (*models.Entry, error) {
 func (repo *EntryRepository) GetMostRecent(resultsPerPage int, page int) ([]*models.Entry, error) {
 	entries := make([]*models.Entry, 0, resultsPerPage)
 
-	rows, err := repo.SqlPool.Query(`
+	queryString := `
 		SELECT
 			entries.id, entries.user_id, entries.slug, entries.display_name
 		FROM entries
 		ORDER BY id DESC
 		LIMIT ?,?
-	`, (page - 1) * resultsPerPage, resultsPerPage)
-	defer rows.Close()
+	`
+	rows, err := repo.SqlPool.Queryx(queryString, (page - 1) * resultsPerPage, resultsPerPage)
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Fatalln("Could not close SQL connection.")
+		}
+	}()
 	if err != nil {
 		log.Println(err)
 		return entries, err
@@ -45,13 +51,7 @@ func (repo *EntryRepository) GetMostRecent(resultsPerPage int, page int) ([]*mod
 
 	for rows.Next() {
 		entry := &models.Entry{}
-
-		if err := rows.Scan(
-			&entry.ID,
-			&entry.UserID,
-			&entry.Slug,
-			&entry.DisplayName,
-		); err != nil {
+		if err = rows.StructScan(entry); err != nil {
 			return entries, err
 		}
 		entries = append(entries, entry)
