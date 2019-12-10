@@ -15,8 +15,10 @@ func (repo *EntryRepository) GetByID(entryID int) (*models.Entry, error) {
 
 	queryString := `
 		SELECT
-			entries.id, entries.user_id, entries.slug, entries.display_name
+			entries.id AS entry_id, entries.user_id, entries.slug, entries.display_name,
+			users.username
 		FROM entries
+		INNER JOIN users ON entries.user_id = users.id
 		WHERE entries.id = ?
 	`
 	row := repo.SqlPool.QueryRowx(queryString, entryID)
