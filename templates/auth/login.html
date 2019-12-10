@@ -1,3 +1,16 @@
 {{ define "content" }}
     <h3>This is the login page.</h3>
+    <form id="login-form" action="/login" method="POST">
+        <div>
+            <label for="username">Username:</label>
+            <input id="login-form-username" type="text" name="username"/>
+        </div>
+
+        <div>
+            <label for="password">Password:</label>
+            <input id="login-form-password" type="password" name="password" />
+        </div>
+
+        <div><input type="submit" value="Log In" /></div>
+    </form>
 {{ end }}

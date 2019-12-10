@@ -10,6 +10,12 @@ type EntryRepository struct {
 	SqlPool *sqlx.DB
 }
 
+func NewEntryRepository(sqlPool *sqlx.DB) *EntryRepository {
+	return &EntryRepository {
+		SqlPool: sqlPool,
+	}
+}
+
 func (repo *EntryRepository) GetByID(entryID int) (*models.Entry, error) {
 	entry := &models.Entry{}
 
@@ -24,6 +30,7 @@ func (repo *EntryRepository) GetByID(entryID int) (*models.Entry, error) {
 	row := repo.SqlPool.QueryRowx(queryString, entryID)
 
 	if err := row.StructScan(entry); err != nil {
+		log.Println(err)
 		return nil, err
 	}
 

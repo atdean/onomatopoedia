@@ -5,24 +5,23 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/atdean/onomatopoedia/pkg/repositories"
 )
 
 type IndexController struct {
-	SqlPool *sqlx.DB
+	App *App
 }
 
-func NewIndexController(db *sqlx.DB) *IndexController {
+func NewIndexController(app *App) *IndexController {
 	return &IndexController{
-		SqlPool: db,
+		App: app,
 	}
 }
 
 func (ctrl *IndexController) GetIndexHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	entriesRepo := repositories.EntryRepository{SqlPool: ctrl.SqlPool}
+	entriesRepo := repositories.NewEntryRepository(ctrl.App.SqlPool)
 	entries, err := entriesRepo.GetMostRecent(10, 1)
 	if err != nil {
 		log.Println(err)
