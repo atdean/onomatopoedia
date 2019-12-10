@@ -1,21 +1,21 @@
 package webserver
 
 import (
-	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/atdean/onomatopoedia/pkg/repositories"
 )
 
 type IndexController struct {
-	SqlPool *sql.DB
+	SqlPool *sqlx.DB
 }
 
-func NewIndexController(db *sql.DB) *IndexController {
+func NewIndexController(db *sqlx.DB) *IndexController {
 	return &IndexController{
 		SqlPool: db,
 	}

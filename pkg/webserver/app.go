@@ -1,9 +1,9 @@
 package webserver
 
-import "database/sql"
+import "github.com/jmoiron/sqlx"
 
 // App is the central dependency for all route controllers and config
 type App struct {
-	SqlPool         *sql.DB
+	SqlPool         *sqlx.DB
 	IndexController *IndexController
 }

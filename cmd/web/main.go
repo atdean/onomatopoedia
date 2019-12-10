@@ -5,20 +5,15 @@ import (
 	"log"
 	"net/http"
 
-	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-
+	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/atdean/onomatopoedia/pkg/webserver"
 )
 
 func main() {
-	dbConn, err := sql.Open("mysql", "onomatopoedia:onomatopoedia@/onomatopoedia")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = dbConn.Ping()
+	dbConn, err := sqlx.Connect("mysql", "onomatopoedia:onomatopoedia@/onomatopoedia")
 	if err != nil {
 		log.Fatalln(err)
 	}
