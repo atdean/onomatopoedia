@@ -14,6 +14,7 @@ type App struct {
 	Router			http.Handler
 	IndexController *IndexController
 	AuthController 	*AuthController
+	EntryController *EntryController
 }
 
 func InitApp(sqlPool *sqlx.DB, redisConn redis.Conn) *App {
@@ -24,6 +25,7 @@ func InitApp(sqlPool *sqlx.DB, redisConn redis.Conn) *App {
 
 	app.IndexController = NewIndexController(app)
 	app.AuthController = NewAuthController(app)
+	app.EntryController = newEntryController(app)
 
 	app.Router = app.initRoutes()
 
@@ -34,6 +36,8 @@ func (app *App) initRoutes() http.Handler {
 	router := httprouter.New()
 
 	router.GET("/", app.IndexController.GetIndexHandler)
+
+	router.GET("/entries/:slug", app.EntryController.GetSingleEntryHandler)
 
 	router.GET("/login", app.AuthController.GetLoginHandler)
 	router.POST("/login", app.AuthController.PostLoginHandler)

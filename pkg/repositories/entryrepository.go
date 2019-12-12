@@ -37,6 +37,27 @@ func (repo *EntryRepository) GetByID(entryID int) (*models.Entry, error) {
 	return entry, nil
 }
 
+func (repo *EntryRepository) GetBySlug(entrySlug string) (*models.Entry, error) {
+	entry := &models.Entry{}
+
+	queryString := `
+		SELECT
+			entries.id AS entry_id, entries.user_id, entries.slug, entries.display_name,
+			users.username
+		FROM entries
+		INNER JOIN users ON entries.user_id = users.id
+		WHERE entries.slug = ?
+	`
+	row := repo.SqlPool.QueryRowx(queryString, entrySlug)
+
+	if err := row.StructScan(entry); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return entry, nil
+}
+
 func (repo *EntryRepository) GetMostRecent(resultsPerPage int, page int) ([]*models.Entry, error) {
 	entries := make([]*models.Entry, 0, resultsPerPage)
 

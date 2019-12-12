@@ -1,3 +1,4 @@
-{{ define "content " }}
-
+{{ define "content" }}
+    <h2>{{ .Entry.DisplayName }}</h2>
+    <p>Posted by <a href="#">{{ .Entry.User.Username }}</a></p>
 {{ end }}
