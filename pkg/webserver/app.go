@@ -10,13 +10,13 @@ import (
 // App is the central dependency for all route controllers and config
 type App struct {
 	SqlPool         *sqlx.DB
-	RedisConn 		*redis.Conn
+	RedisConn 		redis.Conn
 	Router			http.Handler
 	IndexController *IndexController
 	AuthController 	*AuthController
 }
 
-func InitApp(sqlPool *sqlx.DB, redisConn *redis.Conn) *App {
+func InitApp(sqlPool *sqlx.DB, redisConn redis.Conn) *App {
 	app := &App{
 		SqlPool: sqlPool,
 		RedisConn: redisConn,

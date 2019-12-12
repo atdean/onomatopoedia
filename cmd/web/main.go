@@ -22,7 +22,8 @@ func main() {
 		log.Fatalln(err);
 	}
 
-	app := webserver.InitApp(sqlPool, &redisConn)
+
+	app := webserver.InitApp(sqlPool, redisConn)
 
 	fmt.Println("HTTP server started... listening on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", app))

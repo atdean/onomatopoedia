@@ -2,12 +2,16 @@ package webserver
 
 import (
 	"database/sql"
-	"github.com/atdean/onomatopoedia/pkg/repositories"
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/satori/go.uuid"
+
+	"github.com/atdean/onomatopoedia/pkg/repositories"
 )
 
 type AuthController struct {
@@ -47,8 +51,8 @@ func (ctrl *AuthController) PostLoginHandler(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("<div>Username or password not provided.</div>"))
 	} else {
-
 		repo := repositories.NewUserRepository(ctrl.App.SqlPool)
+
 		user, err := repo.GetByUsername(username)
 		if err != nil || user == nil {
 			if err == sql.ErrNoRows {
@@ -63,8 +67,23 @@ func (ctrl *AuthController) PostLoginHandler(w http.ResponseWriter, r *http.Requ
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write([]byte("<div>Incorrect password."))
 			} else {
-				w.WriteHeader(http.StatusOK)
-				w.Write([]byte("<div>You made it!</div>"))
+				// Create a random-number session token
+				sessionToken := uuid.NewV4().String()
+				fmt.Println(sessionToken)
+
+				_, err := ctrl.App.RedisConn.Do("SETEX", sessionToken, "120", username)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				http.SetCookie(w, &http.Cookie{
+					Name: "session_token",
+					Value: sessionToken,
+					Expires: time.Now().Add(120 * time.Second),
+				})
+
+				http.Redirect(w, r, "/", http.StatusOK)
 			}
 		}
 	}
