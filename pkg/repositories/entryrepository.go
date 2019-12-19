@@ -16,7 +16,7 @@ func NewEntryRepository(sqlPool *sqlx.DB) *EntryRepository {
 	}
 }
 
-func (repo *EntryRepository) GetByID(entryID int) (*models.Entry, error) {
+func (repo *EntryRepository) GetByID(entryID int) (*models.Entry , error) {
 	entry := &models.Entry{}
 
 	queryString := `
@@ -38,8 +38,6 @@ func (repo *EntryRepository) GetByID(entryID int) (*models.Entry, error) {
 }
 
 func (repo *EntryRepository) GetBySlug(entrySlug string) (*models.Entry, error) {
-	entry := &models.Entry{}
-
 	queryString := `
 		SELECT
 			entries.id AS entry_id, entries.user_id, entries.slug, entries.display_name,
@@ -50,6 +48,7 @@ func (repo *EntryRepository) GetBySlug(entrySlug string) (*models.Entry, error) 
 	`
 	row := repo.SqlPool.QueryRowx(queryString, entrySlug)
 
+	entry := &models.Entry{}
 	if err := row.StructScan(entry); err != nil {
 		log.Println(err)
 		return nil, err
@@ -59,8 +58,6 @@ func (repo *EntryRepository) GetBySlug(entrySlug string) (*models.Entry, error) 
 }
 
 func (repo *EntryRepository) GetMostRecent(resultsPerPage int, page int) ([]*models.Entry, error) {
-	entries := make([]*models.Entry, 0, resultsPerPage)
-
 	queryString := `
 		SELECT
 			entries.id AS entry_id, entries.user_id, entries.slug, entries.display_name,
@@ -71,25 +68,22 @@ func (repo *EntryRepository) GetMostRecent(resultsPerPage int, page int) ([]*mod
 		LIMIT ?,?
 	`
 	rows, err := repo.SqlPool.Queryx(queryString, (page - 1) * resultsPerPage, resultsPerPage)
-	defer func() {
-		if err := rows.Close(); err != nil {
-			log.Fatalln("Could not close SQL connection.")
-		}
-	}()
+	defer closeConnection(rows)
 	if err != nil {
 		log.Println(err)
-		return entries, err
+		return nil, err
 	}
 
+	entries := make([]*models.Entry, 0, resultsPerPage)
 	for rows.Next() {
 		entry := &models.Entry{}
 		if err = rows.StructScan(entry); err != nil {
-			return entries, err
+			return nil, err
 		}
 		entries = append(entries, entry)
 	}
 	if err = rows.Err(); err != nil {
-		return entries, err
+		return nil, err
 	}
 
 	return entries, nil

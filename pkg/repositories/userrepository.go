@@ -17,8 +17,6 @@ func NewUserRepository(sqlPool *sqlx.DB) *UserRepository {
 }
 
 func (repo *UserRepository) GetByID(userID int) (*models.User, error) {
-	user := &models.User{}
-
 	queryString := `
 		SELECT
 			id AS user_id, username, email, password
@@ -27,6 +25,7 @@ func (repo *UserRepository) GetByID(userID int) (*models.User, error) {
 	`
 	row := repo.SqlPool.QueryRowx(queryString, userID)
 
+	user := &models.User{}
 	if err := row.StructScan(user); err != nil {
 		log.Printf("UserRepository.GetByID: %s\n", err)
 		return nil, err
@@ -36,8 +35,6 @@ func (repo *UserRepository) GetByID(userID int) (*models.User, error) {
 }
 
 func (repo *UserRepository) GetByUsername(username string) (*models.User, error) {
-	user := &models.User{}
-
 	queryString := `
 		SELECT
 			id AS user_id, username, email, password
@@ -46,6 +43,7 @@ func (repo *UserRepository) GetByUsername(username string) (*models.User, error)
 	`
 	row := repo.SqlPool.QueryRowx(queryString, username)
 
+	user := &models.User{}
 	if err := row.StructScan(user); err != nil {
 		log.Printf("UserRepository.GetByUsername: %s\n", err)
 		return nil, err
