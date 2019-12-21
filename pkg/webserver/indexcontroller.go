@@ -27,6 +27,13 @@ func (ctrl *IndexController) GetIndexHandler(w http.ResponseWriter, r *http.Requ
 		log.Println(err)
 	}
 
+	activeUser, err := ctrl.App.AuthController.GetLoggedInUser(r)
+	if err != nil {
+		ctrl.App.ErrorLogger.Println(err)
+	} else {
+		ctrl.App.InfoLogger.Printf("Current logged in user is %s\n", activeUser.Username)
+	}
+
 	data := map[string]interface{}{
 		"PageTitle": "Home",
 		"Entries": entries,

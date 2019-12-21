@@ -3,9 +3,10 @@ package webserver
 import (
 	"database/sql"
 	"fmt"
+	"github.com/atdean/onomatopoedia/pkg/models"
+	"github.com/gomodule/redigo/redis"
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
-	"log"
 	"net/http"
 	"time"
 
@@ -32,8 +33,8 @@ func (ctrl *AuthController) GetSignupHandler(w http.ResponseWriter, r *http.Requ
 		"templates/auth/signup.html",
 	))
 	if err := renderer.ExecuteTemplate(w, "base", nil); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("<div>Sorry, an internal server error occurred.</div<"))
+		ctrl.App.ServerError(w, err)
+		return
 	}
 }
 
@@ -44,14 +45,14 @@ func (ctrl *AuthController) PostSignupHandler(w http.ResponseWriter, r *http.Req
 	email := r.PostFormValue("email")
 	password := r.PostFormValue("password")
 
-	// TODO :: Check to ensure that username and email aren't already registered
-
 	repo := repositories.NewUserRepository(ctrl.App.SqlPool)
 	newUser, err := repo.CreateNewUser(username, email, password)
 	if err != nil {
-		log.Println(err)
+		ctrl.App.ServerError(w, err)
+		return
 	}
 
+	// TODO :: Log the new user in and redirect them to their profile page
 	fmt.Fprintf(w, "New user created!\n%v\n", newUser)
 }
 
@@ -62,8 +63,8 @@ func (ctrl *AuthController) GetLoginHandler(w http.ResponseWriter, r *http.Reque
 		"templates/auth/login.html",
 	))
 	if err := renderer.ExecuteTemplate(w, "base", nil); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("<div>Sorry, an internal server error occurred.</div>"))
+		ctrl.App.ServerError(w, err)
+		return
 	}
 }
 
@@ -73,8 +74,9 @@ func (ctrl *AuthController) PostLoginHandler(w http.ResponseWriter, r *http.Requ
 	password := r.PostFormValue("password")
 
 	if len(username) <= 0 || len(password) <= 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("<div>Username or password not provided.</div>"))
+		//ctrl.App.ClientError(w, http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusMovedPermanently)
+		return
 	} else {
 		repo := repositories.NewUserRepository(ctrl.App.SqlPool)
 
@@ -84,32 +86,61 @@ func (ctrl *AuthController) PostLoginHandler(w http.ResponseWriter, r *http.Requ
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write([]byte("<div>Username not found.</div>"))
 			} else {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("<div>Sorry, an internal server error occurred.</div>"))
+				ctrl.App.ServerError(w, err)
+				return
 			}
 		} else {
 			if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte("<div>Incorrect password."))
+				w.Write([]byte("<div>Incorrect password.</div>"))
 			} else {
 				// Create a random-number session token
 				sessionToken := uuid.NewV4().String()
 				fmt.Println(sessionToken)
 
-				_, err := ctrl.App.RedisConn.Do("SETEX", sessionToken, "120", username)
+				_, err := ctrl.App.RedisConn.Do("SETEX", sessionToken, "21600", username)
 				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
+					ctrl.App.ServerError(w, err)
 					return
 				}
 
 				http.SetCookie(w, &http.Cookie{
 					Name: "session_token",
 					Value: sessionToken,
-					Expires: time.Now().Add(120 * time.Second),
+					// TODO :: take the session expiration time from config/env var
+					Expires: time.Now().Add(6 * time.Hour),
 				})
 
 				http.Redirect(w, r, "/", http.StatusOK)
 			}
 		}
 	}
+}
+
+func (ctrl *AuthController) GetLoggedInUser(r *http.Request) (*models.User, error) {
+	sessionCookie, err := r.Cookie("session_token")
+	if err != nil && err == http.ErrNoCookie {
+		// No user is logged on
+		return nil, err
+	}
+
+	sessionToken := sessionCookie.Value
+
+	username, err := redis.String(ctrl.App.RedisConn.Do("GET", sessionToken))
+	if err != nil {
+		ctrl.App.ErrorLogger.Printf("Unable to fetch session token from redis for %s\n", sessionToken)
+		return nil, err
+	} else if username == "" {
+		ctrl.App.ErrorLogger.Printf("Username fetched from session token is blank for %s\n", sessionToken)
+		return nil, fmt.Errorf("Could not validate logged in user.")
+	}
+
+	repo := repositories.NewUserRepository(ctrl.App.SqlPool)
+	user, err := repo.GetByUsername(username)
+	if err != nil {
+		ctrl.App.ErrorLogger.Printf("AuthController->GetLoggedInUser: Username not found in database.")
+		return nil, err
+	}
+
+	return user, nil
 }

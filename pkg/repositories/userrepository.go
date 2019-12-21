@@ -37,10 +37,16 @@ func (repo *UserRepository) CreateNewUser(username, email, password string) (*mo
 	result, err := repo.SqlPool.Exec(queryString, user.Username, user.Email, user.Password)
 	if err != nil {
 		var mySQLError *mysql.MySQLError
+
 		if errors.As(err, &mySQLError) {
-			log.Printf("MySQL Error: %s\n", mySQLError.Message)
-			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users_email_uindex") {
-				return nil, fmt.Errorf("Could not insert user: %s\n", mySQLError.Message)
+			if mySQLError.Number == 1062 {
+				if strings.Contains(mySQLError.Message, "users_email_uindex") {
+					return nil, fmt.Errorf("Could not insert user: %s\n", mySQLError.Message)
+				} else if strings.Contains(mySQLError.Message, "users_username_uindex") {
+					// TODO :: do the same thing for now - in the future return custom error types to caller
+					// That way we can gracefully redirect back to the login page and highlight the bad fields
+					return nil, fmt.Errorf("Could not insert user: %s\n", mySQLError.Message)
+				}
 			}
 		}
 		return nil, err
