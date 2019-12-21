@@ -17,8 +17,6 @@ func NewEntryRepository(sqlPool *sqlx.DB) *EntryRepository {
 }
 
 func (repo *EntryRepository) GetByID(entryID int) (*models.Entry , error) {
-	entry := &models.Entry{}
-
 	queryString := `
 		SELECT
 			entries.id AS entry_id, entries.user_id, entries.slug, entries.display_name,
@@ -29,6 +27,7 @@ func (repo *EntryRepository) GetByID(entryID int) (*models.Entry , error) {
 	`
 	row := repo.SqlPool.QueryRowx(queryString, entryID)
 
+	entry := &models.Entry{}
 	if err := row.StructScan(entry); err != nil {
 		log.Println(err)
 		return nil, err

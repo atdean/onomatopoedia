@@ -12,7 +12,7 @@ type EntryController struct {
 	App *App
 }
 
-func newEntryController(app *App) *EntryController {
+func NewEntryController(app *App) *EntryController {
 	return &EntryController{
 		App: app,
 	}

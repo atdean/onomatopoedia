@@ -19,9 +19,8 @@ func main() {
 
 	redisConn, err := redis.DialURL("redis://localhost")
 	if err != nil {
-		log.Fatalln(err);
+		log.Fatalln(err)
 	}
-
 
 	app := webserver.InitApp(sqlPool, redisConn)
 

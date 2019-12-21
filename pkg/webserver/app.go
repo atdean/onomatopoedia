@@ -12,6 +12,7 @@ type App struct {
 	SqlPool         *sqlx.DB
 	RedisConn 		redis.Conn
 	Router			http.Handler
+	SecretKey		string
 	IndexController *IndexController
 	AuthController 	*AuthController
 	EntryController *EntryController
@@ -21,11 +22,13 @@ func InitApp(sqlPool *sqlx.DB, redisConn redis.Conn) *App {
 	app := &App{
 		SqlPool: sqlPool,
 		RedisConn: redisConn,
+		// TODO :: Pull this from an env var or flag, and make a CLI tool to regenerate it
+		SecretKey: "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge",
 	}
 
 	app.IndexController = NewIndexController(app)
 	app.AuthController = NewAuthController(app)
-	app.EntryController = newEntryController(app)
+	app.EntryController = NewEntryController(app)
 
 	app.Router = app.initRoutes()
 
@@ -39,6 +42,8 @@ func (app *App) initRoutes() http.Handler {
 
 	router.GET("/entries/:slug", app.EntryController.GetSingleEntryHandler)
 
+	router.GET("/signup", app.AuthController.GetSignupHandler)
+	router.POST("/signup", app.AuthController.PostSignupHandler)
 	router.GET("/login", app.AuthController.GetLoginHandler)
 	router.POST("/login", app.AuthController.PostLoginHandler)
 

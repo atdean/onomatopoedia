@@ -1,0 +1,21 @@
+{{ define "content" }}
+    <h3>This is the signup page.</h3>
+    <form id="login-form" action="/signup" method="POST">
+        <div>
+            <label for="username">Username:</label>
+            <input id="login-form-username" type="text" name="username"/>
+        </div>
+
+        <div>
+            <label for="email">Email address:</label>
+            <input id="login-form-email" type="text" name="email"/>
+        </div>
+
+        <div>
+            <label for="password">Password:</label>
+            <input id="login-form-password" type="password" name="password" />
+        </div>
+
+        <div><input type="submit" value="Sign up" /></div>
+    </form>
+{{ end }}

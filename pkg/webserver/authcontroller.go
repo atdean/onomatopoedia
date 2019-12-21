@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
 
@@ -25,10 +26,34 @@ func NewAuthController(app *App) *AuthController {
 }
 
 // GET /signup
+func (ctrl *AuthController) GetSignupHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	renderer := template.Must(template.ParseFiles(
+		"templates/base.html",
+		"templates/auth/signup.html",
+	))
+	if err := renderer.ExecuteTemplate(w, "base", nil); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("<div>Sorry, an internal server error occurred.</div<"))
+	}
+}
 
 // POST /signup
-// Code to hash password, for later use
-// hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), 8)
+func (ctrl *AuthController) PostSignupHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	// TODO :: Sanitize and validate form data
+	username := r.PostFormValue("username")
+	email := r.PostFormValue("email")
+	password := r.PostFormValue("password")
+
+	// TODO :: Check to ensure that username and email aren't already registered
+
+	repo := repositories.NewUserRepository(ctrl.App.SqlPool)
+	newUser, err := repo.CreateNewUser(username, email, password)
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Fprintf(w, "New user created!\n%v\n", newUser)
+}
 
 // GET /login
 func (ctrl *AuthController) GetLoginHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
